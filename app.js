@@ -7,16 +7,8 @@ var express = require("express"),
 const User = require("./model/User");
 const Reservation = require("./model/Reservation");
 
-
-
-
-const orderRouter = require('./model/Order');
-
-
-
- 
-
-const CartItem = require('./model/CartItem');
+const Order = require('./model/Order');
+const CartItem = require("./model/CartItem");
 
 
 var app = express();
@@ -58,7 +50,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
 
-app.use('/order', orderRouter);
   
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
@@ -78,6 +69,10 @@ app.get("/index", isLoggedIn, function (req, res) {
     res.render("index");
 });
   
+app.get("/thank-you", (req, res) => {
+  res.render("thank-you");
+});
+
 // Showing register form
 app.get("/register", function (req, res) {
     res.render("register");
@@ -120,8 +115,25 @@ app.post("/reservation", async (req, res) => {
 });
 
 
+app.post("/order", async (req, res) => {
+  try {
+    const order = await Order.create({
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      address: req.body.address
+    });
+    
+    // Redirect to the thank-you page or any other desired page
+    return res.redirect("/thank-you");
+  } catch (error) {
+    // Handle error if the order creation fails
+    console.error(error);
+    return res.status(500).send("Error creating order.");
+  }
+});
 
-  
+
 
 // Handling user signup
 app.post("/register", async (req, res) => {
@@ -231,21 +243,6 @@ app.delete('/cart/:id', async function(req, res) {
     res.status(500).send('Failed to delete cart item.');
   }
 });
-
-
-
-app.post("/order", async (req, res) => {
-  const user = await User.create({
-    username: req.body.username,
-    email: req.body.email,
-    phone: req.body.phone,
-    password: req.body.password
-  });
-  
-  return res.redirect("/thank-you");
-
-});
-
 
 
 var port = process.env.PORT || 3000;

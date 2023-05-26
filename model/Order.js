@@ -14,9 +14,6 @@ const orderSchema = new Schema({
     },
   address: {
      type: String
-    },
-  timestamp: {
-     type: Date
     }
 });
 
